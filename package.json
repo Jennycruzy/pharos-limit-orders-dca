@@ -1,0 +1,17 @@
+{
+  "name": "pharos-limit-orders-dca",
+  "version": "0.1.0",
+  "description": "Unattended limit orders and recurring DCA swaps on Pharos via FaroSwap.",
+  "license": "MIT",
+  "scripts": {
+    "orders": "ts-node scripts/orders.ts"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
+  }
+}

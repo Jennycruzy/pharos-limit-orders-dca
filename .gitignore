@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# secrets & local config
+.env
+.env.local
+
+# runtime data
+orders.json
+*.pid
+*.log
+
+# build output
+dist/
