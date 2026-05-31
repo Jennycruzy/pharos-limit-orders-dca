@@ -42,6 +42,7 @@ npx ts-node scripts/orders.ts add --type dca --side buy --pay USDC --amount 20 -
 npx ts-node scripts/orders.ts list              # show orders + fills
 npx ts-node scripts/orders.ts cancel --id <id>  # cancel one
 npx ts-node scripts/orders.ts status            # is the watcher running?
+npx ts-node scripts/orders.ts price             # live price, read-only (no order/funds)
 npx ts-node scripts/orders.ts watch             # foreground (good for demos)
 npx ts-node scripts/orders.ts watch --daemon    # detached background process
 ```

@@ -15,7 +15,13 @@ import {
   OrderType,
 } from "./store";
 import { runWatcher } from "./watcher";
-import { WATCHER_PID_FILE, BASE_SYMBOL, QUOTE_SYMBOL } from "./config";
+import {
+  WATCHER_PID_FILE,
+  BASE_SYMBOL,
+  QUOTE_SYMBOL,
+  NETWORK,
+  EXPLORER,
+} from "./config";
 
 // Map natural-language token names to the configured symbols. The native token
 // is PHRS; orders trade its wrapped form WPHRS, so "PHRS"/"PROS" -> WPHRS.
@@ -128,6 +134,22 @@ async function main(): Promise<void> {
       break;
     }
 
+    case "price": {
+      // Read-only live price from the FaroSwap pool. Good for a "read before
+      // write" check before creating an order, and a clean demo beat on its own.
+      const { getPrice, resolvePool } = await import("./price");
+      const pool = await resolvePool();
+      const price = await getPrice();
+      console.log(`network : ${NETWORK}`);
+      console.log(`pool    : ${pool.address}  (fee ${pool.fee / 10_000}%)`);
+      console.log(
+        `price   : 1 ${BASE_SYMBOL} = ${price.toFixed(6)} ${QUOTE_SYMBOL}` +
+          `   (1 ${QUOTE_SYMBOL} = ${(1 / price).toFixed(6)} ${BASE_SYMBOL})`
+      );
+      console.log(`explorer: ${EXPLORER}/address/${pool.address}`);
+      break;
+    }
+
     case "watch": {
       if (flag("daemon")) {
         // Re-spawn this script detached, running the watcher in foreground.
@@ -150,7 +172,7 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.log("commands: add | list | cancel | status | watch  (see SKILL.md)");
+      console.log("commands: add | list | cancel | status | price | watch  (see SKILL.md)");
   }
 }
 

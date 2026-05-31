@@ -63,7 +63,13 @@ workspace and they read `AGENTS.md` / `.cursor/rules/` automatically.
 
 ## The live demo (what you say + what judges see)
 
-Say to the agent, in plain English:
+Optional opener (read-only, proves the feed is live before any order):
+> **"What's PHRS worth right now?"** → agent runs `price`:
+> ```
+> price   : 1 WPHRS = 0.607093 USDC   (1 USDC = 1.647194 WPHRS)
+> ```
+
+Then, in plain English:
 
 > **"DCA 1 USDC into PHRS every 30 seconds on mainnet, and run the watcher in the foreground."**
 
@@ -126,11 +132,10 @@ MAINNET via FaroSwap. Do these steps and report back at each one:
    set PHAROS_NETWORK=mainnet. If the default RPC_URL is unreachable from this
    machine, ask me for a working Pharos mainnet RPC URL and put it in .env.
 
-3. READ BEFORE ANY WRITE — confirm the price feed works before risking funds.
-   Run the watcher in the foreground for ~40s with NO orders yet:
-     npx ts-node scripts/orders.ts watch
-   Confirm it logs a believable "price = <n> USDC/WPHRS" (around 0.6, not 0,
-   NaN, or an error). If it errors on the pool/price, STOP and tell me. Ctrl-C.
+3. READ BEFORE ANY WRITE — confirm the price feed works before risking funds:
+     npx ts-node scripts/orders.ts price
+   Confirm it prints a believable "1 WPHRS = <n> USDC" (around 0.6, not 0, NaN,
+   or an error). If it errors on the pool/price, STOP and tell me.
 
 4. Confirm the wallet is funded: it needs PHRS for gas and ~1 USDC for a buy. If
    USDC balance is 0, tell me and wait.

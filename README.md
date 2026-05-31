@@ -153,6 +153,16 @@ npx ts-node scripts/orders.ts cancel --id <id>
 npx ts-node scripts/orders.ts status      # -> "watcher: running" | "watcher: stopped"
 ```
 
+### `price` — read the live price (no order, no funds)
+
+```bash
+npx ts-node scripts/orders.ts price
+```
+
+Reads the current FaroSwap price straight from the pool and prints the network,
+pool, and `1 WPHRS = N USDC` (plus the inverse). Read-only — a good "does the
+feed work?" check before creating an order, and a clean standalone demo beat.
+
 ### `watch` — run the watcher (this is what makes it persistent)
 
 ```bash

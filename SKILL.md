@@ -57,7 +57,11 @@ Reads as: every 7 days, spend 20 USDC buying PROS.
 npx ts-node scripts/orders.ts list                 # show all orders + status
 npx ts-node scripts/orders.ts cancel --id <id>     # cancel one order
 npx ts-node scripts/orders.ts status               # is the watcher running?
+npx ts-node scripts/orders.ts price                # read live price (no order/funds)
 ```
+
+Use `price` to answer "what's PHRS worth right now?" and as a read-only check
+that the feed works before creating an order.
 
 **Run the watcher (this is what makes it persistent)**
 ```
