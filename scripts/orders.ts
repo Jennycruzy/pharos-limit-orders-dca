@@ -53,11 +53,19 @@ function watcherRunning(): boolean {
   }
 }
 
+// Render a seconds interval back into the most natural unit (604800 -> "7d").
+function formatDuration(sec: number): string {
+  for (const [unit, size] of [["d", 86400], ["h", 3600], ["m", 60]] as const) {
+    if (sec % size === 0 && sec >= size) return `${sec / size}${unit}`;
+  }
+  return `${sec}s`;
+}
+
 function printOrder(o: Order): void {
   const cond =
     o.type === "limit"
       ? `${o.side} when price ${o.side === "sell" ? ">=" : "<="} ${o.targetPrice}`
-      : `every ${(o.intervalSec ?? 0) / 86400}d`;
+      : `every ${formatDuration(o.intervalSec ?? 0)}`;
   console.log(
     `  ${o.id}  [${o.status}]  ${o.type} ${o.side} ${o.amount} ${o.pay}  (${cond})  fills:${o.fillCount}` +
       (o.lastTxHash ? `  last:${o.lastTxHash}` : "")

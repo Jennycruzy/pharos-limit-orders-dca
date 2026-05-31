@@ -1,0 +1,27 @@
+---
+description: Pharos limit orders & DCA on FaroSwap — use when the user wants a swap to happen later or repeatedly (limit order, stop, DCA, "sell when it hits $X", "buy every week").
+alwaysApply: false
+---
+
+# Pharos Limit Orders & DCA (FaroSwap)
+
+This repo is an agent skill for unattended **limit orders** and recurring **DCA**
+swaps on the Pharos Network via FaroSwap. Full instructions live in
+[AGENTS.md](mdc:AGENTS.md) — follow it. Quick reference:
+
+- Map one user request → one `add` call, then ensure the watcher runs.
+- Pair is WPHRS/USDC; price is USDC per WPHRS. `PHRS`/`PROS` normalize to WPHRS.
+
+```bash
+npx ts-node scripts/orders.ts add --type dca --side buy --pay USDC --amount 20 --every 7d
+npx ts-node scripts/orders.ts add --type limit --side sell --pay WPHRS --amount 100 --target 0.50
+npx ts-node scripts/orders.ts list | cancel --id <id> | status | watch [--daemon]
+```
+
+- "sell PHRS when…" → `--side sell --pay WPHRS`; "buy/DCA into PHRS" → `--side buy --pay USDC`.
+- "$0.50" → `--target 0.50`; "every week" → `--every 7d`.
+- After `add`, run `status`; if stopped, `watch --daemon`. An order with no watcher never fires.
+
+Setup: `npm install`, then `PRIVATE_KEY` in `.env`. Addresses are pre-filled in
+`scripts/config.ts` (testnet default; `PHAROS_NETWORK=mainnet` for real funds) —
+do not edit them. Never widen slippage or log the private key.

@@ -159,10 +159,13 @@ use to detect whether it's alive.
 
 ## How agents use this skill
 
-This repo is packaged as an **Agent Skill** (`SKILL.md` + `scripts/`). An agent
-host loads `SKILL.md`, whose `description` front-matter tells the model *when* to
-reach for it, and the body tells it *how*. The CLI is intentionally the entire
-surface area: one `add` command per user intent, plus a watcher to start.
+This repo is packaged as an **agent skill**, and it's agent-neutral: the same
+instructions ship in the entry file each tool reads —
+`SKILL.md` (Claude Code), `AGENTS.md` (Codex / Jules / Zed / Aider), and
+`.cursor/rules/` (Cursor). Each tells the model *when* to reach for the skill and
+*how* to drive it. The CLI is intentionally the entire surface area: one `add`
+command per user intent, plus a watcher to start. For a step-by-step live demo,
+see [`DEMO.md`](DEMO.md).
 
 **1. Recognize the intent.** Trigger this skill whenever a swap should happen
 *later* or *repeatedly* rather than now — phrases like "sell my PHRS when it hits
@@ -255,7 +258,10 @@ The private key is read from `env` and never logged.
 
 ```
 pharos-limit-orders-dca/
-├── SKILL.md          # agent entry point: when-to-trigger description, commands, safety
+├── SKILL.md          # agent entry point (Claude Code): when-to-trigger, commands, safety
+├── AGENTS.md         # same skill for Codex / Jules / Zed / Aider (cross-agent standard)
+├── .cursor/rules/    # same skill for Cursor
+├── DEMO.md           # step-by-step live demo runbook + hand-off prompt
 ├── README.md         # this file
 ├── package.json      # ethers v6 + ts-node
 ├── tsconfig.json
