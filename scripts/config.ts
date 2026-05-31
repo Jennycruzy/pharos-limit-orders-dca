@@ -89,7 +89,9 @@ export const NETWORKS: Record<string, NetworkConfig> = {
     rpcUrl: process.env.RPC_URL ?? "https://infra.originstake.com/pharos/evm",
     explorer: "https://pharosscan.xyz",
     tokens: {
-      WPHRS: { address: "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0", decimals: 18 }, // verified symbol()="WPHRS"
+      // On-chain symbol() is "WPROS" (verified); we key it as WPHRS internally
+      // and normalizeSymbol() maps PHRS/PROS/WPHRS to this entry. Address + decimals verified.
+      WPHRS: { address: "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0", decimals: 18 }, // verified symbol()="WPROS", decimals()=18
       USDC:  { address: "0xc879c018db60520f4355c26ed1a6d572cdac1815", decimals: 6 },  // verified symbol()="USDC"
     },
     faroswap: {
