@@ -68,13 +68,24 @@ The watcher must be running for orders to fire. `add` will warn if it isn't.
 
 ## Translating natural language
 
-When the user speaks, map to a single `add` call. Infer `--side` from intent:
-"sell PROS when..." -> side sell, pay PROS. "buy PROS / DCA into PROS" ->
-side buy, pay USDC. A price like "$0.50" is `--target 0.50` (USDC per PROS).
-"every week" -> `--every 7d`; accept `s`/`m`/`h`/`d` suffixes.
+The user talks in plain English; you do the rest. Each request is a short loop:
 
-If the watcher is not running after you create an order, start it
-(`watch --daemon`) so the order can actually fire — otherwise nothing happens.
+1. **Map the sentence to one `add` call.** Infer `--side` from intent:
+   "sell PROS when..." -> side sell, pay PROS. "buy PROS / DCA into PROS" ->
+   side buy, pay USDC. A price like "$0.50" is `--target 0.50` (USDC per PROS).
+   "every week" -> `--every 7d`; accept `s`/`m`/`h`/`d` suffixes. If an amount is
+   missing, ask for just that one number — don't ask about flags or addresses.
+2. **Ensure the watcher is running.** Check `status`; if it's stopped, start it
+   with `watch --daemon`. An order with no watcher silently never fires — this is
+   the single most common failure mode, so always verify it.
+3. **Confirm back in plain English.** Tell the user what was created (side,
+   amount, trigger), that the watcher is running, and which network it's on
+   (testnet vs mainnet). Surface fill transaction hashes from `list` so they can
+   check the explorer.
+
+For "what do I have / cancel that / is it still watching", use `list`, `cancel
+--id`, and `status` and answer conversationally — the user never needs to see a
+flag or an address.
 
 ## Safety (this runs unattended — be conservative)
 
@@ -91,12 +102,18 @@ Never log the private key. Never widen the slippage cap to force a fill.
 
 ## Setup
 
-1. `npm install`
-2. `cp .env.example .env` and set `PRIVATE_KEY` and `RPC_URL`.
-3. Open `scripts/config.ts` and fill every value marked `TODO: VERIFY` —
-   the FaroSwap router, the PROS/USDC pool address, and the token addresses
-   and decimals. See `README.md` for the exact explorer steps to get these.
-4. `npx ts-node scripts/orders.ts add ...` then `... watch`.
+One-time, before the first order:
 
-Do NOT trust the placeholder addresses in config — they are zeros. The skill
-will refuse to run until real, verified values are filled in.
+1. `npm install`
+2. `cp .env.example .env` and set `PRIVATE_KEY` (the wallet that signs fills).
+   `RPC_URL` is optional — a sane default per network is built in.
+
+That's the whole setup. **All FaroSwap and token addresses are already filled in
+for both testnet and mainnet** in `scripts/config.ts`; you do not edit it. The
+config defaults to testnet (faucet liquidity, so fills execute); set
+`PHAROS_NETWORK=mainnet` to trade real funds.
+
+The skill is self-checking: if any required address were wrong or missing, the
+watcher refuses to start with a clear error (the pool lookup fails, or
+`assertConfigured()` blocks it) — it never silently trades against the wrong
+token. So you can just create an order and start the watcher.

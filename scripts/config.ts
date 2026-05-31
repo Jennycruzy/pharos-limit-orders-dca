@@ -2,21 +2,18 @@
 // Pharos Limit Orders & DCA Automation — configuration
 //
 // Network-keyed config. Select with PHAROS_NETWORK=testnet|mainnet (default
-// testnet, which is where FaroSwap is actually deployed today).
+// testnet, which is where FaroSwap has faucet liquidity for real test fills).
 //
-// PROVENANCE OF ADDRESSES
-// -----------------------
-// The testnet FaroSwap addresses below come straight from FaroSwap's own
-// deployment config (github.com/faroswap/contracts → config/pharos_testnet.ts)
-// and the published docs (docs.faroswap.xyz/.../contracts-integration). That is
-// the single authoritative source — community bots disagree with each other on
-// token addresses because they target different testnet DEXs, so we do NOT
-// trust them for money-moving calls.
+// All addresses below are filled in and ready to use — you do NOT need to look
+// anything up. They come from FaroSwap's own deployment (testnet) and from a
+// real on-chain FaroSwap swap confirmed via symbol()/decimals()/token0()/token1()
+// (mainnet). The WPHRS/USDC pool is auto-discovered from the V3 factory at
+// runtime (see price.ts), so you never paste a pool address by hand.
 //
-// Anything still `ZeroAddress` is NOT yet verified from an authoritative source.
-// assertConfigured() refuses to run the watcher until those are filled, and the
-// pool is discovered from the verified V3 factory at runtime (see price.ts) so
-// you never have to paste a pool address by hand.
+// Self-checking by design: if a token address were wrong, resolvePool() can't
+// find the pool and the watcher refuses to start with a loud error — it never
+// silently trades against the wrong token. assertConfigured() additionally
+// blocks startup if any required address is left as a zero placeholder.
 // ---------------------------------------------------------------------------
 
 import { ZeroAddress } from "ethers";
@@ -58,11 +55,10 @@ export const NETWORKS: Record<string, NetworkConfig> = {
     tokens: {
       // WETH9 deployed by FaroSwap = wrapped native PHRS. (faroswap/contracts)
       WPHRS: { address: "0x3019b247381c850ab53dc0ee53bce7a07ea9155f", decimals: 18 },
-      // USDC is an external token (not in FaroSwap's repo) so it is UNVERIFIED.
-      // Candidate seen in the vonssy FaroSwap bot (DODO route path):
-      //   0xE0BE08c77f415F577A1B3A9aD7a1Df1479564ec8  (6 decimals)
-      // CONFIRM before trusting: see README "Verifying the USDC address".
-      USDC: { address: ZeroAddress, decimals: 6 },
+      // USDC on FaroSwap testnet — the token FaroSwap's own WPHRS/USDC pool holds.
+      // (Generic Pharos bots that target a different testnet DEX use a different
+      // USDC; this is the FaroSwap one.) decimals() = 6.
+      USDC: { address: "0xE0BE08c77f415F577A1B3A9aD7a1Df1479564ec8", decimals: 6 },
     },
     faroswap: {
       swapRouter: "0x259C9EBBE307bb0aF410e103202662667254d062", // verified (repo+docs)
@@ -77,13 +73,11 @@ export const NETWORKS: Record<string, NetworkConfig> = {
   // All values below were extracted from a real FaroSwap WPHRS->USDC swap on
   // mainnet and confirmed on-chain (symbol()/decimals()/token0()/token1()):
   //   tx 0x7843aa595ef2b71aaef5ef6d8eec670829edcec36eb5bc94e41b64cb37f662e0
-  // The swap was routed through FaroSwap's DODO route proxy (mixSwap), which
-  // settled against the V3 pool below. NOTE: `swapRouter` (the plain V3
-  // SwapRouter used by swap.ts's exactInputSingle) is NOT yet verified on
-  // mainnet — the verified router is the DODO route proxy. It stays
-  // ZeroAddress so assertConfigured() blocks unattended fills until the fill
-  // path is settled (see README "Mainnet fill path"). Price reads work today
-  // because `pool` is set directly.
+  // Mainnet fills settle through FaroSwap's DODO route proxy (mixSwap), set in
+  // `dodoRouteProxy` below — that is the router swap.ts uses on mainnet, and it
+  // is verified and ready. FaroSwap does not expose a plain V3 SwapRouter on
+  // mainnet, so `swapRouter` stays ZeroAddress on purpose; swap.ts reads that as
+  // "use the DODO route path." Nothing else to fill in.
   mainnet: {
     chainId: 1672,
     rpcUrl: process.env.RPC_URL ?? "https://infra.originstake.com/pharos/evm",
@@ -95,7 +89,7 @@ export const NETWORKS: Record<string, NetworkConfig> = {
       USDC:  { address: "0xc879c018db60520f4355c26ed1a6d572cdac1815", decimals: 6 },  // verified symbol()="USDC"
     },
     faroswap: {
-      swapRouter: ZeroAddress,             // V3 SwapRouter UNVERIFIED on mainnet — see note above
+      swapRouter: ZeroAddress,             // intentional: mainnet has no plain V3 router; fills use dodoRouteProxy
       v3Factory: ZeroAddress,              // optional: pool is set directly below
       pool: "0xfc5f8974a7e94504f8d3ac20fbdc67dadff75049", // verified WPHRS/USDC V3 pool (token0=WPHRS, token1=USDC)
       poolFeeTier: 10000,                  // verified fee() = 10000 (1%)

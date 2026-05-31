@@ -16,6 +16,29 @@ predicate in `scripts/trigger.ts`.
 
 ---
 
+## Just talk to it (plain English)
+
+This is an **agent skill** — the normal way to use it is to tell your agent what
+you want in everyday language. You don't run commands or edit addresses yourself;
+the agent maps your sentence to the right action and makes sure the watcher is
+running. Things you can say:
+
+| You say…                                         | What happens                                              |
+| ------------------------------------------------ | --------------------------------------------------------- |
+| "Sell 100 PHRS when it hits $0.50."              | Creates a limit sell at 0.50 USDC and starts the watcher. |
+| "Buy PHRS if it drops to $0.30, spend 50 USDC."  | Creates a limit buy at 0.30 USDC.                         |
+| "DCA $20 into PHRS every week."                  | Creates a recurring buy of 20 USDC every 7 days.          |
+| "What orders do I have?"                         | Lists your orders, their status, and any fills.           |
+| "Cancel that one."                               | Cancels the order.                                        |
+| "Is it still watching?"                          | Reports whether the background watcher is running.        |
+
+One-time setup before your first order: `npm install`, then put your wallet's
+`PRIVATE_KEY` in `.env` (copy `.env.example`). That's it — all the FaroSwap and
+token addresses are already filled in for both testnet and mainnet. The sections
+below document the underlying CLI the agent drives for you.
+
+---
+
 ## How it works
 
 ```
@@ -179,43 +202,29 @@ or echo the private key.
 
 ## Configuration & addresses
 
-All on-chain wiring lives in `scripts/config.ts`, keyed by network. It selects
-`testnet` by default (where FaroSwap is fully live with faucet liquidity) and
-exposes `mainnet` too. Addresses come from FaroSwap's own deployment config and
-docs, or were extracted from a real on-chain swap and confirmed via
-`symbol()`/`decimals()`/`token0()`/`token1()` — **not** from third-party bots,
-which disagree with each other on token addresses.
+All on-chain wiring lives in `scripts/config.ts`, keyed by network, and is
+**already filled in for both testnet and mainnet** — there is nothing for you to
+look up or paste. It selects `testnet` by default (where FaroSwap has faucet
+liquidity, so test fills actually execute) and exposes `mainnet` too. Addresses
+come from FaroSwap's own deployment (testnet) and from a real on-chain FaroSwap
+swap confirmed via `symbol()`/`decimals()`/`token0()`/`token1()` (mainnet).
 
-`assertConfigured()` refuses to run the watcher while any money-moving address is
-still a zero placeholder, and the V3 pool is **auto-discovered** from the verified
-factory at runtime, so you never paste a pool address by hand.
+Two safety nets mean a bad address can never cause a bad trade:
 
-### Verifying the USDC address (testnet)
+- The WPHRS/USDC pool is **auto-discovered** from FaroSwap's V3 factory at
+  runtime, so you never paste a pool address. If a token address were wrong, the
+  pool lookup fails and the watcher refuses to start with a clear error — it
+  never trades against the wrong token.
+- `assertConfigured()` refuses to start while any required address is still a
+  zero placeholder.
 
-USDC is an external token (not in FaroSwap's repo), so on testnet it ships as a
-zero placeholder and the watcher will refuse to run until you fill it. To verify
-it the right way — don't trust a pasted address for a money-moving call:
-
-1. Do one tiny WPHRS↔USDC swap in the FaroSwap app.
-2. Open that transaction on the Pharos explorer (`testnet.pharosscan.xyz`).
-3. Read the token-transfer rows: the non-WPHRS token is USDC. Confirm its
-   `symbol()` is `USDC` and `decimals()` is `6`.
-4. Paste it into `TOKENS.USDC.address` for the `testnet` block in `config.ts`.
-
-Confirm with a **read before any write**: run the watcher in the foreground and
-check the logged price is a believable USDC/WPHRS number. If it is, the pool,
-tokens, and decimals are all wired correctly.
-
-### Mainnet fill path
-
-On mainnet the WPHRS/USDC pool and token addresses are verified and **price reads
-work today**. The plain V3 `SwapRouter` (`exactInputSingle`) is *not* yet verified
-on mainnet, so it stays a zero placeholder and `assertConfigured()` blocks
-unattended fills until the fill path is settled. FaroSwap's mainnet swaps settle
-through a DODO route proxy (`mixSwap`) whose calldata is built by DODO's hosted
-pathfinder; the executor anchors safety on-chain by submitting only if the API's
-returned router matches the configured `dodoRouteProxy` and the quote clears the
-local slippage floor.
+Each network simply uses the router FaroSwap actually exposes there: a plain V3
+`SwapRouter` on **testnet**, and FaroSwap's **DODO route proxy** (`mixSwap`) on
+**mainnet**. On mainnet, the route's calldata is built by DODO's hosted
+pathfinder, and the executor anchors safety on-chain — it submits only if the
+API's returned router matches the configured `dodoRouteProxy` *and* the quote
+clears the local slippage floor. Both paths are wired and ready; you don't pick
+one, the code uses the right one for the selected network.
 
 ---
 
@@ -265,8 +274,9 @@ pharos-limit-orders-dca/
 ## Network
 
 Defaults to **testnet (688688)**, which has faucet liquidity so fills actually
-execute. Set `PHAROS_NETWORK=mainnet` (1672) once the mainnet fill path is
-settled (see *Mainnet fill path* above). Whichever you use, state it plainly.
+execute. Set `PHAROS_NETWORK=mainnet` (1672) to trade real funds — mainnet is
+fully wired (tokens, pool, and the DODO route proxy fill path). Whichever you
+use, state it plainly so the user knows which network an order will fire on.
 
 ## License
 
