@@ -76,8 +76,10 @@ Then, in plain English:
 The agent runs:
 ```bash
 npx ts-node scripts/orders.ts add --type dca --side buy --pay USDC --amount 1 --every 30s
-npx ts-node scripts/orders.ts watch     # foreground — judges watch this log
+npx ts-node scripts/orders.ts watch --once   # foreground; fires once, then exits cleanly
 ```
+(`--once` exits right after the first fill — clean ending for a screen recording.
+Drop it if you want the DCA to keep repeating live.)
 
 Judges see:
 ```
@@ -141,9 +143,9 @@ MAINNET via FaroSwap. Do these steps and report back at each one:
    USDC balance is 0, tell me and wait.
 
 5. Create a fast DCA so it fires immediately, then run the watcher in the
-   foreground so I can screen-record the log:
+   foreground (--once exits right after the first fill) so I can screen-record:
      npx ts-node scripts/orders.ts add --type dca --side buy --pay USDC --amount 1 --every 30s
-     npx ts-node scripts/orders.ts watch
+     npx ts-node scripts/orders.ts watch --once
 
 6. When you see "filled: 0x...", give me the tx hash and the explorer link
    https://pharosscan.xyz/tx/<hash>. Then run:

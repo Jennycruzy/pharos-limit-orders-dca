@@ -151,11 +151,12 @@ async function main(): Promise<void> {
     }
 
     case "watch": {
+      const once = flag("once"); // exit after the first fill (good for a demo recording)
       if (flag("daemon")) {
         // Re-spawn this script detached, running the watcher in foreground.
         const child = spawn(
           "npx",
-          ["ts-node", __filename, "watch"],
+          ["ts-node", __filename, "watch", ...(once ? ["--once"] : [])],
           { detached: true, stdio: "ignore" }
         );
         child.unref();
@@ -166,7 +167,7 @@ async function main(): Promise<void> {
         process.on("exit", () => {
           try { unlinkSync(WATCHER_PID_FILE); } catch {}
         });
-        await runWatcher(); // blocks
+        await runWatcher({ once }); // blocks (or runs until the first fill with --once)
       }
       break;
     }

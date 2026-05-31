@@ -45,6 +45,7 @@ npx ts-node scripts/orders.ts status            # is the watcher running?
 npx ts-node scripts/orders.ts price             # live price, read-only (no order/funds)
 npx ts-node scripts/orders.ts watch             # foreground (good for demos)
 npx ts-node scripts/orders.ts watch --daemon    # detached background process
+npx ts-node scripts/orders.ts watch --once      # foreground; exit after the first fill
 ```
 
 | Flag       | For    | Meaning                                                      |

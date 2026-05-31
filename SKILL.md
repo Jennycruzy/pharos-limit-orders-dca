@@ -67,6 +67,7 @@ that the feed works before creating an order.
 ```
 npx ts-node scripts/orders.ts watch                # foreground (good for demo video)
 npx ts-node scripts/orders.ts watch --daemon       # detached background process
+npx ts-node scripts/orders.ts watch --once         # foreground; exit after the first fill
 ```
 The watcher must be running for orders to fire. `add` will warn if it isn't.
 

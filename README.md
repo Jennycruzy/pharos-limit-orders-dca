@@ -168,11 +168,13 @@ feed work?" check before creating an order, and a clean standalone demo beat.
 ```bash
 npx ts-node scripts/orders.ts watch            # foreground; blocks, logs each poll
 npx ts-node scripts/orders.ts watch --daemon   # detached background process
+npx ts-node scripts/orders.ts watch --once     # foreground; exit cleanly after the first fill
 ```
 
 The watcher must be running for any order to fire. `--daemon` re-spawns the
 process detached and records its PID in `watcher.pid`, which `status` and `add`
-use to detect whether it's alive.
+use to detect whether it's alive. `--once` keeps polling until the first
+successful fill, then exits — handy for a tight demo recording.
 
 ---
 
