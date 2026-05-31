@@ -70,6 +70,15 @@ what the FaroSwap V3 pools actually hold. The CLI accepts `PHRS`, `PROS`, or
 
 ## Installation
 
+One command (clones if needed, installs deps, scaffolds `.env`, and links the
+skill into Claude Code):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jennycruzy/pharos-limit-orders-dca/main/install.sh | bash
+```
+
+Or manually:
+
 ```bash
 npm install
 cp .env.example .env          # then edit it
@@ -262,6 +271,7 @@ pharos-limit-orders-dca/
 ├── AGENTS.md         # same skill for Codex / Jules / Zed / Aider (cross-agent standard)
 ├── .cursor/rules/    # same skill for Cursor
 ├── DEMO.md           # step-by-step live demo runbook + hand-off prompt
+├── install.sh        # one-command setup (clone, deps, .env, skill link)
 ├── README.md         # this file
 ├── package.json      # ethers v6 + ts-node
 ├── tsconfig.json

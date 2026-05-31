@@ -10,35 +10,54 @@ This skill is agent-neutral. It works with **Claude Code** (`SKILL.md`),
 
 ---
 
+## Choose your network
+
+| Network     | Best for                          | Funding                                  | Explorer                      |
+| ----------- | --------------------------------- | ---------------------------------------- | ----------------------------- |
+| **mainnet** | **Recommended** — a real swap of real value, real explorer link, no faucet | real PHRS (gas) + a little USDC | `pharosscan.xyz`              |
+| testnet     | Free dry runs                     | faucet PHRS + a little USDC              | `testnet.pharosscan.xyz`      |
+
+Set the network in `.env` with `PHAROS_NETWORK=mainnet` (defaults to testnet if
+unset). Everything else is identical between the two — the code picks the right
+router per network automatically.
+
+**Mainnet is verified and ready.** The price feed and fill path were checked
+end-to-end (read-only) before this doc was written:
+- live price ≈ `0.607 USDC/WPHRS` from the verified WPHRS/USDC pool;
+- DODO's pathfinder returns a real route for Pharos mainnet (chain 1672) whose
+  target **matches** the configured `dodoRouteProxy` — which is exactly the
+  on-chain check `swap.ts` enforces before it will submit.
+
+So on mainnet the only thing left to happen live is the signed transaction
+itself. Keep the demo amount tiny (e.g. **1 USDC**) — it's real money.
+
 ## Why the demo is deterministic
 
 A **DCA** order fires on the *very first* watcher poll (`trigger.ts`:
 `nextRunAt == null → fire now`), and the watcher runs a tick immediately on
 start and logs the live price every poll. So you don't wait for the market to
-move — starting the watcher produces a fill within seconds. That's your live
-"it works" moment.
+move — starting the watcher produces a fill within seconds.
 
 ---
 
 ## One-time setup
 
-1. **Install the skill into your agent** (so plain English triggers it):
-   - *Claude Code:* `ln -sfn "$PWD" ~/.claude/skills/pharos-limit-orders-dca`
-   - *Codex / Cursor / others:* just open this repo as the workspace — they read
-     `AGENTS.md` / `.cursor/rules/` automatically.
-2. **Install deps & key:**
-   ```bash
-   npm install
-   cp .env.example .env      # then put your wallet PRIVATE_KEY in it
-   ```
-   Addresses are already filled in (`scripts/config.ts`); don't edit them.
-   Defaults to **testnet**.
-3. **Fund the demo wallet** (it does a real swap):
-   - Testnet **PHRS for gas** from the Pharos faucet.
-   - A little **USDC** for a *buy* demo — do one tiny WPHRS→USDC swap in the
-     FaroSwap app. (Or demo a *sell* and fund WPHRS instead.)
-   - Keep amounts tiny, e.g. **1 USDC**, so the fill clears the balance and
-     slippage guards.
+One command (clones if needed, installs deps, scaffolds `.env`, and registers
+the skill with Claude Code):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jennycruzy/pharos-limit-orders-dca/main/install.sh | bash
+# or, inside a clone:  ./install.sh
+```
+
+Then:
+1. Put your wallet `PRIVATE_KEY` in `.env`. For this demo add `PHAROS_NETWORK=mainnet`.
+   Addresses are already filled in (`scripts/config.ts`) — don't edit them.
+2. **Fund the wallet** (it does a real swap): real **PHRS for gas** + a little
+   **USDC** for a *buy* (or **WPHRS** for a *sell*). Tiny amounts are fine.
+
+Codex / Cursor / Zed / Aider don't need the symlink — just open the repo as the
+workspace and they read `AGENTS.md` / `.cursor/rules/` automatically.
 
 ---
 
@@ -46,7 +65,7 @@ move — starting the watcher produces a fill within seconds. That's your live
 
 Say to the agent, in plain English:
 
-> **"DCA 1 USDC into PHRS every 30 seconds on testnet, and run the watcher in the foreground."**
+> **"DCA 1 USDC into PHRS every 30 seconds on mainnet, and run the watcher in the foreground."**
 
 The agent runs:
 ```bash
@@ -57,13 +76,13 @@ npx ts-node scripts/orders.ts watch     # foreground — judges watch this log
 Judges see:
 ```
 [..] watcher started — polling every 30s
-[..] price = 0.0xxxxx USDC/WPHRS — 1 active order(s)
+[..] price = 0.6xxxxx USDC/WPHRS — 1 active order(s)
 [..] firing dca <id> (buy 1 USDC)
 [..]   filled: 0x<txhash>
 ```
 
 Then:
-- Open `https://testnet.pharosscan.xyz/tx/0x<txhash>` — the swap on-chain.
+- Open `https://pharosscan.xyz/tx/0x<txhash>` (testnet: `https://testnet.pharosscan.xyz/tx/...`).
 - Say **"what orders do I have?"** → agent runs `list`, fill count climbs each interval.
 - Say **"cancel it"** → agent runs `cancel --id <id>`.
 
@@ -78,45 +97,43 @@ trigger reads live price, not a timer.
 
 ## Gotchas to rehearse
 
-- **RPC reachability.** The watcher needs a reachable Pharos RPC. The default
-  testnet endpoint is network-gated; if it's blocked where you demo, set a
-  working `RPC_URL` in `.env` before going live.
+- **RPC reachability.** The watcher needs a reachable Pharos RPC. The mainnet
+  default (`infra.originstake.com/pharos/evm`) is public and was reachable during
+  validation; if it's slow/blocked where you demo, set a working `RPC_URL` in
+  `.env`.
 - **No funds = visible abort, not a crash.** Unfunded, the watcher still logs the
   live price and prints `fill aborted: insufficient … — order stays active`.
-  That shows the safety guard, but it's not an on-chain tx — fund the wallet for
-  the explorer link.
+  That actually shows the safety guard working, but it's not an on-chain tx — so
+  fund the wallet for the explorer link.
 
 ---
 
 ## Hand-off prompt for the agent on your Mac (runs the real fill)
 
 Paste this to any coding agent (Claude Code / Codex / Cursor) in a terminal that
-has internet + a funded testnet wallet. It does a read-before-write check, then
-one tiny real fill:
+has internet + a funded wallet. It does a read-before-write check, then one tiny
+real fill. Defaults to **mainnet**; change `PHAROS_NETWORK` for testnet.
 
 ```
 You are setting up a live demo of the "pharos-limit-orders-dca" skill on Pharos
-testnet via FaroSwap. Do these steps and report back at each one:
+MAINNET via FaroSwap. Do these steps and report back at each one:
 
-1. Clone and enter the repo (skip clone if already present):
-   git clone https://github.com/Jennycruzy/pharos-limit-orders-dca.git
-   cd pharos-limit-orders-dca && npm install
+1. Set up the repo:
+   curl -fsSL https://raw.githubusercontent.com/Jennycruzy/pharos-limit-orders-dca/main/install.sh | bash
+   cd pharos-limit-orders-dca
 
-2. Create .env from .env.example and set PRIVATE_KEY to the funded testnet
-   wallet I give you. Do NOT print the private key. Leave PHAROS_NETWORK unset
-   (defaults to testnet). If the default RPC_URL is unreachable from this
-   machine, ask me for a working Pharos testnet RPC URL and put it in .env.
+2. In .env set PRIVATE_KEY to the funded wallet I give you (do NOT print it) and
+   set PHAROS_NETWORK=mainnet. If the default RPC_URL is unreachable from this
+   machine, ask me for a working Pharos mainnet RPC URL and put it in .env.
 
 3. READ BEFORE ANY WRITE — confirm the price feed works before risking funds.
    Run the watcher in the foreground for ~40s with NO orders yet:
      npx ts-node scripts/orders.ts watch
-   Confirm it logs a believable "price = <n> USDC/WPHRS" line (a small number,
-   not 0, NaN, or an error). If it errors on the pool/price, STOP and tell me —
-   do not proceed. Then Ctrl-C.
+   Confirm it logs a believable "price = <n> USDC/WPHRS" (around 0.6, not 0,
+   NaN, or an error). If it errors on the pool/price, STOP and tell me. Ctrl-C.
 
-4. Confirm the wallet is funded: it needs testnet PHRS for gas and ~1 USDC for a
-   buy. If USDC balance is 0, tell me how to get it (faucet / one FaroSwap swap)
-   and wait.
+4. Confirm the wallet is funded: it needs PHRS for gas and ~1 USDC for a buy. If
+   USDC balance is 0, tell me and wait.
 
 5. Create a fast DCA so it fires immediately, then run the watcher in the
    foreground so I can screen-record the log:
@@ -124,7 +141,7 @@ testnet via FaroSwap. Do these steps and report back at each one:
      npx ts-node scripts/orders.ts watch
 
 6. When you see "filled: 0x...", give me the tx hash and the explorer link
-   https://testnet.pharosscan.xyz/tx/<hash>. Then run:
+   https://pharosscan.xyz/tx/<hash>. Then run:
      npx ts-node scripts/orders.ts list
    and report the fill count. Then cancel the order:
      npx ts-node scripts/orders.ts cancel --id <id>
