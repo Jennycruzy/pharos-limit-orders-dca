@@ -84,7 +84,9 @@ set `PHAROS_NETWORK=mainnet` to trade real funds.
 
 ### Fresh install behavior
 
-When the user asks to install this skill, keep it short:
+When the user asks to install this skill, keep it short. The user does not need
+to separately ask what the skill does; include the one-sentence explanation
+automatically after install:
 
 1. Clone/open the repo if needed.
 2. Run `npm install`.

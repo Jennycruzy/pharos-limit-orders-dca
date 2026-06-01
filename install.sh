@@ -44,9 +44,11 @@ fi
 
 # 4. Register the skill with Claude Code (optional, harmless if unused).
 if command -v claude >/dev/null 2>&1 || [ -d "$HOME/.claude" ]; then
-  mkdir -p "$HOME/.claude/skills"
-  ln -sfn "$(pwd)" "$HOME/.claude/skills/$REPO_DIR"
-  say "Linked into ~/.claude/skills/$REPO_DIR (Claude Code will auto-discover it)"
+  if mkdir -p "$HOME/.claude/skills" && ln -sfn "$(pwd)" "$HOME/.claude/skills/$REPO_DIR"; then
+    say "Linked into ~/.claude/skills/$REPO_DIR (Claude Code will auto-discover it)"
+  else
+    warn "Optional Claude Code skill link skipped. Open this repo directly or link it manually later."
+  fi
 fi
 # Codex / Cursor / Zed / Aider read AGENTS.md and .cursor/rules/ from the repo
 # root automatically — just open this folder as the workspace.
