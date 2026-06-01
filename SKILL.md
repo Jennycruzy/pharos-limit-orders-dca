@@ -114,9 +114,9 @@ One-time, before the first order:
    `RPC_URL` is optional — a sane default per network is built in.
 
 That's the whole setup. **All FaroSwap and token addresses are already filled in
-for both testnet and mainnet** in `scripts/config.ts`; you do not edit it. The
-config defaults to testnet (faucet liquidity, so fills execute); set
-`PHAROS_NETWORK=mainnet` to trade real funds.
+for both mainnet and testnet** in `scripts/config.ts`; you do not edit it. The
+config defaults to mainnet for the clean demo path with real explorer-confirmed
+fills. Set `PHAROS_NETWORK=testnet` only if you intentionally want testnet.
 
 ## Fresh install behavior
 

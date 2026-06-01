@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------------
 // Pharos Limit Orders & DCA Automation — configuration
 //
-// Network-keyed config. Select with PHAROS_NETWORK=testnet|mainnet (default
-// testnet, which is where FaroSwap has faucet liquidity for real test fills).
+// Network-keyed config. Select with PHAROS_NETWORK=mainnet|testnet (default
+// mainnet, which is the recommended demo path with real explorer-confirmed fills).
 //
 // All addresses below are filled in and ready to use — you do NOT need to look
 // anything up. They come from FaroSwap's own deployment (testnet) and from a
@@ -100,7 +100,7 @@ export const NETWORKS: Record<string, NetworkConfig> = {
 };
 
 // --- Active network selection -----------------------------------------------
-export const NETWORK = (process.env.PHAROS_NETWORK ?? "testnet").toLowerCase();
+export const NETWORK = (process.env.PHAROS_NETWORK ?? "mainnet").toLowerCase();
 const active = NETWORKS[NETWORK];
 if (!active) {
   throw new Error(

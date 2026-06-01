@@ -78,9 +78,10 @@ any fill tx hashes from `list`.
 2. Copy `.env.example` to `.env` and set `PRIVATE_KEY` (the wallet that signs
    fills). `RPC_URL` is optional — a per-network default is built in.
 
-All FaroSwap/token addresses are already filled in for testnet and mainnet in
-`scripts/config.ts` — **do not edit it**. Defaults to testnet (faucet liquidity);
-set `PHAROS_NETWORK=mainnet` to trade real funds.
+All FaroSwap/token addresses are already filled in for mainnet and testnet in
+`scripts/config.ts` — **do not edit it**. Defaults to mainnet for the clean demo
+path with real explorer-confirmed fills. Set `PHAROS_NETWORK=testnet` only if
+you intentionally want testnet.
 
 ### Fresh install behavior
 

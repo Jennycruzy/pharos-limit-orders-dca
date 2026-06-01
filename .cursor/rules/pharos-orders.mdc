@@ -23,8 +23,9 @@ npx ts-node scripts/orders.ts list | cancel --id <id> | status | watch [--daemon
 - After `add`, run `status`; if stopped, `watch --daemon`. An order with no watcher never fires.
 
 Setup: `npm install`, then `PRIVATE_KEY` in `.env`. Addresses are pre-filled in
-`scripts/config.ts` (testnet default; `PHAROS_NETWORK=mainnet` for real funds) —
-do not edit them. Never widen slippage or log the private key.
+`scripts/config.ts` (mainnet default; set `PHAROS_NETWORK=testnet` only for an
+intentional testnet run) — do not edit them. Never widen slippage or log the
+private key.
 
 Fresh install: keep it short. Run `npm install`, create `.env` from
 `.env.example` if missing, automatically tell the user this skill creates

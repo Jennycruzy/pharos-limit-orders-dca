@@ -39,7 +39,7 @@ else
   say "Creating .env from .env.example"
   cp .env.example .env
   warn "Edit .env and set PRIVATE_KEY (the wallet that signs fills)."
-  warn "For a MAINNET demo also set: PHAROS_NETWORK=mainnet"
+  warn "Default network is mainnet. Set PHAROS_NETWORK=testnet only for testnet."
 fi
 
 # 4. Register the skill with Claude Code (optional, harmless if unused).
@@ -68,7 +68,7 @@ What this skill does:
 
 Before live fills:
   Put your funded wallet PRIVATE_KEY in .env.
-  For a mainnet demo, also set PHAROS_NETWORK=mainnet.
+  Default network is mainnet. Set PHAROS_NETWORK=testnet only for testnet.
 
 Then ask your agent in plain English, for example:
   "Buy PHRS with 0.01 USDC when PHRS is below $1."

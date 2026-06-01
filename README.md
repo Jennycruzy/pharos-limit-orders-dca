@@ -96,7 +96,7 @@ Optional environment overrides:
 
 | Variable                 | Default                                  | Purpose                                |
 | ------------------------ | ---------------------------------------- | -------------------------------------- |
-| `PHAROS_NETWORK`         | `testnet`                                | `testnet` (688688) or `mainnet` (1672).|
+| `PHAROS_NETWORK`         | `mainnet`                                | `mainnet` (1672) or `testnet` (688688).|
 | `FAROSWAP_ROUTE_API`     | DODO hosted route service                | DODO pathfinder endpoint for mainnet.  |
 | `FAROSWAP_ROUTE_API_KEY` | built-in widget key                      | API key for the route service.         |
 
@@ -227,11 +227,12 @@ or echo the private key.
 ## Configuration & addresses
 
 All on-chain wiring lives in `scripts/config.ts`, keyed by network, and is
-**already filled in for both testnet and mainnet** — there is nothing for you to
-look up or paste. It selects `testnet` by default (where FaroSwap has faucet
-liquidity, so test fills actually execute) and exposes `mainnet` too. Addresses
-come from FaroSwap's own deployment (testnet) and from a real on-chain FaroSwap
-swap confirmed via `symbol()`/`decimals()`/`token0()`/`token1()` (mainnet).
+**already filled in for both mainnet and testnet** — there is nothing for you to
+look up or paste. It selects `mainnet` by default for the clean demo path with
+real explorer-confirmed fills, and exposes `testnet` as an explicit opt-in.
+Addresses come from FaroSwap's own deployment (testnet) and from a real on-chain
+FaroSwap swap confirmed via `symbol()`/`decimals()`/`token0()`/`token1()`
+(mainnet).
 
 Two safety nets mean a bad address can never cause a bad trade:
 
@@ -301,10 +302,11 @@ pharos-limit-orders-dca/
 
 ## Network
 
-Defaults to **testnet (688688)**, which has faucet liquidity so fills actually
-execute. Set `PHAROS_NETWORK=mainnet` (1672) to trade real funds — mainnet is
-fully wired (tokens, pool, and the DODO route proxy fill path). Whichever you
-use, state it plainly so the user knows which network an order will fire on.
+Defaults to **mainnet (1672)** for real explorer-confirmed fills. Set
+`PHAROS_NETWORK=testnet` (688688) only if you intentionally want a testnet run.
+Mainnet is fully wired (tokens, pool, and the DODO route proxy fill path).
+Whichever you use, state it plainly so the user knows which network an order
+will fire on.
 
 ## License
 

@@ -17,9 +17,9 @@ This skill is agent-neutral. It works with **Claude Code** (`SKILL.md`),
 | **mainnet** | **Recommended** — a real swap of real value, real explorer link, no faucet | real PHRS (gas) + a little USDC | `pharosscan.xyz`              |
 | testnet     | Free dry runs                     | faucet PHRS + a little USDC              | `testnet.pharosscan.xyz`      |
 
-Set the network in `.env` with `PHAROS_NETWORK=mainnet` (defaults to testnet if
-unset). Everything else is identical between the two — the code picks the right
-router per network automatically.
+The default network is mainnet. Set `PHAROS_NETWORK=testnet` only if you
+intentionally want a testnet run. Everything else is identical between the two —
+the code picks the right router per network automatically.
 
 **Mainnet is verified and ready.** The price feed and fill path were checked
 end-to-end (read-only) before this doc was written:
@@ -51,7 +51,7 @@ curl -fsSL https://raw.githubusercontent.com/Jennycruzy/pharos-limit-orders-dca/
 ```
 
 Then:
-1. Put your wallet `PRIVATE_KEY` in `.env`. For this demo add `PHAROS_NETWORK=mainnet`.
+1. Put your wallet `PRIVATE_KEY` in `.env`. The default network is mainnet.
    Addresses are already filled in (`scripts/config.ts`) — don't edit them.
 2. **Fund the wallet** (it does a real swap): real **PHRS for gas** + a little
    **USDC** for a *buy* (or **WPHRS** for a *sell*). Tiny amounts are fine.
@@ -130,8 +130,8 @@ MAINNET via FaroSwap. Do these steps and report back at each one:
    curl -fsSL https://raw.githubusercontent.com/Jennycruzy/pharos-limit-orders-dca/main/install.sh | bash
    cd pharos-limit-orders-dca
 
-2. In .env set PRIVATE_KEY to the funded wallet I give you (do NOT print it) and
-   set PHAROS_NETWORK=mainnet. If the default RPC_URL is unreachable from this
+2. In .env set PRIVATE_KEY to the funded wallet I give you (do NOT print it).
+   Mainnet is the default. If the default RPC_URL is unreachable from this
    machine, ask me for a working Pharos mainnet RPC URL and put it in .env.
 
 3. READ BEFORE ANY WRITE — confirm the price feed works before risking funds:

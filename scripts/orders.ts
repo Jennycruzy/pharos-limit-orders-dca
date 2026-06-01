@@ -88,7 +88,7 @@ function requirePrivateKeyForWrites(): void {
   } else {
     console.error("Put your funded wallet PRIVATE_KEY in .env.");
   }
-  console.error("For a mainnet demo, also set PHAROS_NETWORK=mainnet in .env.");
+  console.error("Mainnet is the default. Set PHAROS_NETWORK=testnet only for a testnet run.");
   console.error("I did not print or use any private key.");
   process.exit(1);
 }
