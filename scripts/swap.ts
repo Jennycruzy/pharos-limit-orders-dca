@@ -142,14 +142,6 @@ export async function executeFill(order: Order): Promise<FillResult> {
   // Testnet: a plain V3 SwapRouter (exactInputSingle). Mainnet: FaroSwap's
   // DODO route proxy (mixSwap), whose calldata comes from the route API.
   const useDodo = FAROSWAP.swapRouter === ZeroAddress;
-  const spender = useDodo ? FAROSWAP.dodoRouteProxy : FAROSWAP.swapRouter;
-
-  // --- Approve the spender if needed -------------------------------------
-  const allowance: bigint = await inErc20.allowance(wallet.address, spender);
-  if (allowance < amountIn) {
-    const approveTx = await inErc20.approve(spender, MaxUint256);
-    await approveTx.wait();
-  }
 
   if (useDodo) {
     // --- DODO route proxy path (mainnet) ---------------------------------
@@ -178,6 +170,15 @@ export async function executeFill(order: Order): Promise<FillResult> {
         reason: `route out ${route.toAmountRaw} below slippage floor ${amountOutMinimum} — order stays active`,
       };
     }
+
+    // DODO returns a separate spender for ERC-20 approval. Approving the tx
+    // target is insufficient and causes SafeERC20 transferFrom failures.
+    const allowance: bigint = await inErc20.allowance(wallet.address, route.approveTarget);
+    if (allowance < amountIn) {
+      const approveTx = await inErc20.approve(route.approveTarget, MaxUint256);
+      await approveTx.wait();
+    }
+
     try {
       const tx = await wallet.sendTransaction({ to: route.to, data: route.data, value: route.value });
       const receipt = await tx.wait();
@@ -188,6 +189,12 @@ export async function executeFill(order: Order): Promise<FillResult> {
   }
 
   // --- V3 SwapRouter path (testnet) --------------------------------------
+  const allowance: bigint = await inErc20.allowance(wallet.address, FAROSWAP.swapRouter);
+  if (allowance < amountIn) {
+    const approveTx = await inErc20.approve(FAROSWAP.swapRouter, MaxUint256);
+    await approveTx.wait();
+  }
+
   const router = new Contract(FAROSWAP.swapRouter, ROUTER_ABI, wallet);
   const deadline = Math.floor(Date.now() / 1000) + 600;
   const params = {

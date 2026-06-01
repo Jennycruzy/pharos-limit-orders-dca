@@ -22,6 +22,7 @@ import {
   NETWORK,
   EXPLORER,
 } from "./config";
+import { ensureEnvScaffold, privateKeyConfigured } from "./env";
 
 // Map natural-language token names to the configured symbols. The native token
 // is PHRS; orders trade its wrapped form WPHRS, so "PHRS"/"PROS" -> WPHRS.
@@ -76,6 +77,20 @@ function printOrder(o: Order): void {
     `  ${o.id}  [${o.status}]  ${o.type} ${o.side} ${o.amount} ${o.pay}  (${cond})  fills:${o.fillCount}` +
       (o.lastTxHash ? `  last:${o.lastTxHash}` : "")
   );
+}
+
+function requirePrivateKeyForWrites(): void {
+  if (privateKeyConfigured()) return;
+  const created = ensureEnvScaffold();
+  console.error("PRIVATE_KEY is not configured, so I cannot execute live fills.");
+  if (created) {
+    console.error("I created .env from .env.example. Put your funded wallet PRIVATE_KEY in .env.");
+  } else {
+    console.error("Put your funded wallet PRIVATE_KEY in .env.");
+  }
+  console.error("For a mainnet demo, also set PHAROS_NETWORK=mainnet in .env.");
+  console.error("I did not print or use any private key.");
+  process.exit(1);
 }
 
 async function main(): Promise<void> {
@@ -152,6 +167,7 @@ async function main(): Promise<void> {
 
     case "watch": {
       const once = flag("once"); // exit after the first fill (good for a demo recording)
+      requirePrivateKeyForWrites();
       if (flag("daemon")) {
         // Re-spawn this script detached, running the watcher in foreground.
         const child = spawn(

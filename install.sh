@@ -57,12 +57,18 @@ npx ts-node scripts/orders.ts status >/dev/null && echo "    CLI OK"
 
 cat <<'NEXT'
 
-Setup complete. Next:
-  1. Put your wallet PRIVATE_KEY in .env  (and PHAROS_NETWORK=mainnet for a mainnet demo).
-  2. Fund that wallet:
-       - mainnet: real PHRS for gas + a little USDC (or WPHRS for a sell).
-       - testnet: PHRS from the faucet + a little USDC.
-  3. Run the demo (see DEMO.md), e.g.:
-       npx ts-node scripts/orders.ts add --type dca --side buy --pay USDC --amount 1 --every 30s
-       npx ts-node scripts/orders.ts watch
+Setup complete.
+
+What this skill does:
+  Creates unattended Pharos limit orders and recurring DCA swaps through
+  FaroSwap. It stores the order, watches live price/time, and fills only when
+  the trigger fires.
+
+Before live fills:
+  Put your funded wallet PRIVATE_KEY in .env.
+  For a mainnet demo, also set PHAROS_NETWORK=mainnet.
+
+Then ask your agent in plain English, for example:
+  "Buy PHRS with 0.01 USDC when PHRS is below $1."
+  "DCA 0.01 USDC into PHRS every 30 seconds."
 NEXT

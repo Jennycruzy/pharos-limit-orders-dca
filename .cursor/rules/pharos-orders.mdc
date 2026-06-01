@@ -25,3 +25,10 @@ npx ts-node scripts/orders.ts list | cancel --id <id> | status | watch [--daemon
 Setup: `npm install`, then `PRIVATE_KEY` in `.env`. Addresses are pre-filled in
 `scripts/config.ts` (testnet default; `PHAROS_NETWORK=mainnet` for real funds) —
 do not edit them. Never widen slippage or log the private key.
+
+Fresh install: keep it short. Run `npm install`, create `.env` from
+`.env.example` if missing, tell the user this skill creates unattended Pharos
+limit orders and recurring DCA swaps through FaroSwap, then stop unless they ask
+for a price check or an order. Do not run audits, broad reviews, live watcher
+tests, or exploratory network checks during install. If a later fill action has
+no `PRIVATE_KEY`, the CLI prints the setup message and creates `.env` if needed.

@@ -82,6 +82,23 @@ All FaroSwap/token addresses are already filled in for testnet and mainnet in
 `scripts/config.ts` — **do not edit it**. Defaults to testnet (faucet liquidity);
 set `PHAROS_NETWORK=mainnet` to trade real funds.
 
+### Fresh install behavior
+
+When the user asks to install this skill, keep it short:
+
+1. Clone/open the repo if needed.
+2. Run `npm install`.
+3. If `.env` is missing, create it from `.env.example`.
+4. Tell the user this skill creates unattended Pharos limit orders and recurring
+   DCA swaps through FaroSwap.
+5. Stop there unless the user asks for a price check or an order.
+
+Do not run audits, broad code reviews, live watcher tests, or exploratory
+network checks during install. When the user later asks for a limit/DCA action,
+run the CLI. If `PRIVATE_KEY` is missing, the CLI creates `.env` if needed and
+prints the setup message; relay that message and wait for the user to add the
+key.
+
 ## Safety (this runs unattended — never weaken it)
 
 `scripts/swap.ts` enforces guards on every fill and ABORTS (leaving the order

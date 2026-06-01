@@ -16,6 +16,7 @@
 // blocks startup if any required address is left as a zero placeholder.
 // ---------------------------------------------------------------------------
 
+import "./env";
 import { ZeroAddress } from "ethers";
 
 export interface TokenInfo {

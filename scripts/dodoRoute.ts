@@ -5,6 +5,8 @@
 // routed through a DODO route proxy (mixSwap), and the calldata for that call is
 // produced by an off-chain pathfinder ("route service"). This module asks that
 // service for a route and returns the raw transaction the executor will send.
+// DODO separates the transaction target (`to`) from the ERC-20 spender
+// (`targetApproveAddr`), so the executor needs both.
 //
 // SAFETY: this module only FETCHES a route. It does not trust it. swap.ts
 // re-checks that the returned `to` equals the verified FAROSWAP.dodoRouteProxy
@@ -16,6 +18,7 @@ import { CHAIN_ID, ROUTE_API, ROUTE_API_KEY, SAFETY } from "./config";
 
 export interface DodoRoute {
   to: string;        // router the calldata must be sent to (we verify == proxy)
+  approveTarget: string; // spender that must be approved before calling `to`
   data: string;      // mixSwap calldata
   value: bigint;     // native value to attach (0 for ERC20->ERC20)
   toAmountRaw: bigint; // expected output in toToken's smallest units
@@ -25,9 +28,10 @@ export interface DodoRoute {
  * Fetch a swap route from FaroSwap's pathfinder.
  *
  * The DODO route-service "getdodoroute" response shape is used (FaroSwap is a
- * DODO-powered DEX). Fields we rely on: data.to, data.data, data.value, and an
- * expected-out amount (resAmount / targetAmount). Parsing is defensive so a
- * minor shape difference is a one-line fix, not a silent wrong-amount bug.
+ * DODO-powered DEX). Fields we rely on: data.to, data.targetApproveAddr,
+ * data.data, data.value, and an expected-out amount (resAmount / targetAmount).
+ * Parsing is defensive so a minor shape difference is a one-line fix, not a
+ * silent wrong-amount bug.
  */
 export async function getDodoRoute(params: {
   fromToken: string;
@@ -73,8 +77,10 @@ export async function getDodoRoute(params: {
   // DODO wraps the payload in { status, data: {...} }; tolerate a flat shape too.
   const d = json?.data ?? json;
   const to: string | undefined = d?.to;
+  const approveTarget: string | undefined =
+    d?.targetApproveAddr ?? d?.approveAddr ?? d?.approveTarget ?? d?.allowanceTarget ?? d?.spender;
   const data: string | undefined = d?.data;
-  if (!to || !data) {
+  if (!to || !approveTarget || !data) {
     throw new Error(`route API returned no calldata (got keys: ${Object.keys(d ?? {}).join(",")})`);
   }
 
@@ -87,6 +93,7 @@ export async function getDodoRoute(params: {
 
   return {
     to,
+    approveTarget,
     data,
     value: BigInt(d.value ?? 0),
     toAmountRaw,

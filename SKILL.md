@@ -118,6 +118,23 @@ for both testnet and mainnet** in `scripts/config.ts`; you do not edit it. The
 config defaults to testnet (faucet liquidity, so fills execute); set
 `PHAROS_NETWORK=mainnet` to trade real funds.
 
+## Fresh install behavior
+
+When the user asks to install this skill, keep it short:
+
+1. Clone/open the repo if needed.
+2. Run `npm install`.
+3. If `.env` is missing, create it from `.env.example`.
+4. Tell the user, in plain English, that this skill creates unattended Pharos
+   limit orders and recurring DCA swaps through FaroSwap.
+5. Stop there unless the user asks for a price check or an order.
+
+Do not run audits, broad code reviews, live watcher tests, or exploratory
+network checks during install. When the user later asks for a limit/DCA action,
+run the CLI. If `PRIVATE_KEY` is missing, the CLI will create `.env` if needed
+and print the exact setup message; relay that message and wait for the user to
+add the key.
+
 The skill is self-checking: if any required address were wrong or missing, the
 watcher refuses to start with a clear error (the pool lookup fails, or
 `assertConfigured()` blocks it) — it never silently trades against the wrong
