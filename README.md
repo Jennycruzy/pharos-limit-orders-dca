@@ -270,9 +270,12 @@ force a trade.
 
 The private key is read from `env` and never logged.
 
-> **Note:** the price-impact estimate in `scripts/swap.ts` is a TODO. Out of the
-> box the slippage floor is the hard protection. Wire a real impact calculation
-> from pool liquidity before running large unattended sizes.
+The price-impact guard is implemented in `scripts/swap.ts`: before a fill, the
+executor reads the pool's current `sqrtPriceX96` and liquidity, estimates the
+single-tick execution impact after pool fees, and aborts if it exceeds
+`MAX_IMPACT_BPS`. For very large trades that would cross multiple V3 ticks, this
+estimate can understate impact, so the slippage floor remains the final hard
+on-chain protection.
 
 ---
 
